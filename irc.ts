@@ -10,6 +10,7 @@ export interface userInfo{
 	ident: string;
 }
 
+
 export class IRC implements userInfo{
     
     nick: string;
