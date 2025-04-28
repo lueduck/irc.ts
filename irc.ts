@@ -10,7 +10,6 @@ export interface userInfo{
 	ident: string;
 }
 
-
 export class IRC implements userInfo{
     
     nick: string;
@@ -185,7 +184,15 @@ export class IRC implements userInfo{
 	privmsg(target:string, message:string){
 		this.sendData("PRIVMSG " + target.split("!")[0] + " :" + message);
 	}
-
+	
+	kick(user:string, channel:string, message?:string){
+		if(!message) message = "";
+		this.sendData("KICK " + channel + " " + user.split("!")[0] + " :" + message);
+	}
+	
+	setModes(target:string, modes:string){
+		this.sendData("MODE " + target.split("!")[0] + " :" + modes);
+	}
 	
 	sendData(data:string){
 		this.socket.write(encoder.encode(data+"\r\n"));
