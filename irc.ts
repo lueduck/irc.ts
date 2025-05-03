@@ -70,13 +70,21 @@ export class IRC implements userInfo{
 	
 	parseData(data: string){
 		//console.log("Data: " + data);
+		/*
+			bits array is an array of parts of the data
+			seperated by a colon :
+		*/
 		const bits: string[] = data.split(" ");
 		if(bits.length < 2) return;
 		
-		let cMsg:string = bits[bits.length - 1];
-		const source:string = bits[0].substr(1);
+		let cMsg: string = bits[bits.length - 1];
+		const source: string = bits[0].substr(1);
 		
-		
+		/*
+			cMsg is the data after the last " :"
+			if this doesn't exist cMsg will be the last
+			bit of the packet
+		*/
 		if(data.indexOf(" :") > 1) cMsg = data.substr(data.indexOf(" :") + 2);
 		
 		switch(bits[0].toUpperCase()){
@@ -121,7 +129,7 @@ export class IRC implements userInfo{
 				
             case "CAP":
                 if(bits[3] == "ACK"){
-                    let caps:string[] = cMsg.split(" ");
+                    let caps: string[] = cMsg.split(" ");
                     if(caps.includes("sasl")){
                         log("Attempting to authenticate with sasl plain...");
                         this.sendData("AUTHENTICATE PLAIN");
@@ -155,7 +163,7 @@ export class IRC implements userInfo{
 				
 				
 			case "MODE":
-				const modes:string = data.substring(bits[0].length + bits[1].length + bits[2].length + 3);
+				const modes: string = data.substring(bits[0].length + bits[1].length + bits[2].length + 3);
 				
 				this.callback("mode", {source: bits[0], target: bits[2], modes: modes});
 				break;
@@ -169,7 +177,7 @@ export class IRC implements userInfo{
 		
 	}
 	
-	callback(name:string, callback: object){
+	callback(name: string, callback: object){
 	
 		/*
 			data
@@ -189,11 +197,11 @@ export class IRC implements userInfo{
 		}
 	}
 	
-	on(name:string, callback: object){
+	on(name: string, callback: object){
 		this.callbackCache[name] = callback;
 	}
 
-	join(channel:string, key?:string){
+	join(channel: string, key?: string){
 		if(key){
 			this.sendData("JOIN " + channel + " :" + key);
 		}else{
@@ -201,7 +209,7 @@ export class IRC implements userInfo{
 		}
 	}
 	
-	part(channel:string, message:string){
+	part(channel: string, message: string){
 		this.sendData("PART " + channel + " :" + message);	
 	}
 	
@@ -209,21 +217,21 @@ export class IRC implements userInfo{
 		this.sendData("PRIVMSG " + target.split("!")[0] + " :" + message);
 	}
 	
-	kick(user:string, channel:string, message?:string){
+	kick(user: string, channel: string, message?: string){
 		if(!message) message = "";
 		this.sendData("KICK " + channel + " " + user.split("!")[0] + " :" + message);
 	}
 	
-	setModes(target:string, modes:string){
+	setModes(target: string, modes: string){
 		this.sendData("MODE " + target.split("!")[0] + " :" + modes);
 	}
 	
-	sendData(data:string){
+	sendData(data: string){
 		this.socket.write(encoder.encode(data+"\r\n"));
 	}
 }
 
-function log(text:string){
+function log(text: string){
 	console.log(text);
 }
 
