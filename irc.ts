@@ -24,6 +24,7 @@ export class IRC implements userInfo{
     sendCache: object;
     readCache: object;
 	callbackCache: object;
+	dataCache: string;
 
 
 
@@ -106,6 +107,14 @@ export class IRC implements userInfo{
 				
 			case Numerics.ERR_SASLFAIL:
 				throw new Error("SASL Login error");
+				break;	
+				
+			case Numerics.RPL_TOPIC:
+				this.dataCache = cMsg;
+				break;	
+				
+			case Numerics.RPL_TOPICWHOTIME:
+				this.callback("topic", {topic: this.dataCache, source: bits[4], time: bits[5]});
 				break;
 
 				
@@ -139,6 +148,18 @@ export class IRC implements userInfo{
 			case "PING":
 				this.sendData("PONG " + bits[1]);
 				break;
+				
+			case "KICK":
+				this.callback("kick", {source: bits[0], target: bits[2], user: bits[3], message: cMsg});
+				break;
+				
+				
+			case "MODE":
+				const modes:string = data.substring(bits[0].length + bits[1].length + bits[2].length + 3);
+				
+				this.callback("mode", {source: bits[0], target: bits[2], modes: modes});
+				break;
+				
 		}
 		
 		//console.log(bits);
@@ -156,6 +177,9 @@ export class IRC implements userInfo{
 			privmsg
 			join
 			part
+			kick
+			topic
+			mode
 		*/
 	
 		for(let i:string in this.callbackCache){
